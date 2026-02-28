@@ -12,3 +12,5 @@ method has been able to classify the lung cancer images with
 an overall accuracy of 80.8%. The results indicate that deep
 learning models using transfer learning can be used for lung
 cancer diagnosis in medical images.
+
+
