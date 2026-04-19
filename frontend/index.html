@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LungAI — Lung Cancer Detection</title>
+  <meta name="description" content="AI-powered lung cancer detection using VGG16, KNN, SVM, and Hybrid CNN-SVM models. Upload an image to classify benign, malignant, or normal tissue." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ─── NAV ──────────────────────────────────────────────────────────── -->
+  <nav class="nav" id="nav">
+    <div class="nav-brand">
+      <span class="nav-icon">🫁</span>
+      <span class="nav-title">LungAI</span>
+    </div>
+    <div class="nav-links">
+      <a href="#upload-section">Analyze</a>
+      <a href="#metrics-section">Metrics</a>
+      <a href="#charts-section">Analytics</a>
+    </div>
+  </nav>
+
+  <!-- ─── HERO ─────────────────────────────────────────────────────────── -->
+  <section class="hero">
+    <div class="hero-bg-blur blur-1"></div>
+    <div class="hero-bg-blur blur-2"></div>
+    <div class="hero-content">
+      <div class="badge">AI-Powered Diagnostics</div>
+      <h1 class="hero-title">Lung Cancer<br /><span class="gradient-text">Detection System</span></h1>
+      <p class="hero-sub">Upload a lung CT or histopathology image and instantly classify it as <strong>Benign</strong>, <strong>Malignant</strong>, or <strong>Normal</strong> — powered by four state-of-the-art models.</p>
+      <div class="model-pills">
+        <span class="pill">VGG16</span>
+        <span class="pill">KNN</span>
+        <span class="pill">SVM</span>
+        <span class="pill">Hybrid CNN-SVM</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── UPLOAD ────────────────────────────────────────────────────────── -->
+  <section class="section" id="upload-section">
+    <div class="container">
+      <h2 class="section-title">Upload Image</h2>
+      <p class="section-sub">Supported formats: JPG, PNG, BMP, TIFF</p>
+
+      <div class="upload-grid">
+        <!-- Dropzone -->
+        <div class="dropzone" id="dropzone">
+          <div class="dropzone-inner" id="dropzone-inner">
+            <div class="drop-icon">📂</div>
+            <p class="drop-label">Drag &amp; drop image here</p>
+            <p class="drop-or">or</p>
+            <label class="btn-upload" for="file-input">Browse File</label>
+            <input type="file" id="file-input" accept="image/*" hidden />
+          </div>
+          <!-- Preview (hidden until file chosen) -->
+          <div class="preview-inner hidden" id="preview-inner">
+            <img id="preview-img" class="preview-img" alt="Preview" />
+            <div class="preview-actions">
+              <span id="preview-name" class="preview-name"></span>
+              <button class="btn-clear" id="btn-clear">✕ Remove</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Result Card -->
+        <div class="result-card" id="result-card">
+          <div class="result-placeholder" id="result-placeholder">
+            <div class="ph-icon">🔍</div>
+            <p>Analysis results will appear here after you upload an image and click <strong>Analyze</strong>.</p>
+          </div>
+
+          <div class="result-content hidden" id="result-content">
+            <div class="result-badge" id="result-badge"></div>
+            <div class="result-label" id="result-label"></div>
+            <div class="result-conf-wrap">
+              <span class="result-conf-label">Overall Confidence</span>
+              <span class="result-conf-val" id="result-conf"></span>
+            </div>
+            <div class="conf-bar-track">
+              <div class="conf-bar-fill" id="conf-bar-fill"></div>
+            </div>
+            <div class="simulated-note" id="simulated-note"></div>
+
+            <!-- Per-model breakdown -->
+            <div class="model-breakdown" id="model-breakdown"></div>
+          </div>
+
+          <!-- Spinner -->
+          <div class="spinner-wrap hidden" id="spinner-wrap">
+            <div class="spinner"></div>
+            <p>Analyzing image…</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="analyze-bar">
+        <button class="btn-analyze" id="btn-analyze" disabled>
+          <span class="btn-icon">🔬</span> Analyze Image
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── METRICS OVERVIEW ──────────────────────────────────────────────── -->
+  <section class="section section-dark" id="metrics-section">
+    <div class="container">
+      <h2 class="section-title">Model Performance</h2>
+      <p class="section-sub">Metrics extracted from training and validation runs across all four models.</p>
+      <div class="metrics-grid" id="metrics-grid">
+        <!-- cards injected by JS -->
+        <div class="metrics-skeleton"></div>
+        <div class="metrics-skeleton"></div>
+        <div class="metrics-skeleton"></div>
+        <div class="metrics-skeleton"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── CHARTS ────────────────────────────────────────────────────────── -->
+  <section class="section" id="charts-section">
+    <div class="container">
+      <h2 class="section-title">Comparative Analytics</h2>
+      <p class="section-sub">Visualizations comparing all four models across key performance dimensions.</p>
+
+      <div class="charts-grid">
+        <!-- Accuracy comparison -->
+        <div class="chart-card chart-card--wide">
+          <div class="chart-card-header">
+            <div class="chart-card-title">Accuracy Comparison</div>
+            <div class="chart-card-sub">Overall accuracy across all four models</div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="accuracyChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Precision / Recall / F1 -->
+        <div class="chart-card chart-card--wide">
+          <div class="chart-card-header">
+            <div class="chart-card-title">Precision / Recall / F1</div>
+            <div class="chart-card-sub">Per-model metric breakdown</div>
+          </div>
+          <div class="chart-wrapper">
+            <canvas id="prfChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Confusion matrices (4 small) -->
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title">VGG16 — Confusion Matrix</div>
+          </div>
+          <div class="chart-wrapper chart-wrapper--sm">
+            <canvas id="cmVGG16"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title">KNN — Confusion Matrix</div>
+          </div>
+          <div class="chart-wrapper chart-wrapper--sm">
+            <canvas id="cmKNN"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title">SVM — Confusion Matrix</div>
+          </div>
+          <div class="chart-wrapper chart-wrapper--sm">
+            <canvas id="cmSVM"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-card-header">
+            <div class="chart-card-title">Hybrid CNN-SVM — Confusion Matrix</div>
+          </div>
+          <div class="chart-wrapper chart-wrapper--sm">
+            <canvas id="cmHybrid"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ─── FOOTER ────────────────────────────────────────────────────────── -->
+  <footer class="footer">
+    <p>LungAI &mdash; Lung Cancer Detection System &bull; Built for academic research</p>
+    <p class="footer-note">⚠️ This tool is for research purposes only and is not a substitute for professional medical diagnosis.</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
