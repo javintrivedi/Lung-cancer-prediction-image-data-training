@@ -3,7 +3,7 @@
    Handles: image upload, API calls, result rendering, Chart.js charts
    ────────────────────────────────────────────────────────────────── */
 
-const API_BASE = "http://localhost:5000";
+const API_BASE = "http://localhost:5001";
 
 // ── DOM refs ──────────────────────────────────────────────────────
 const dropzone        = document.getElementById("dropzone");
@@ -92,6 +92,7 @@ btnAnalyze.addEventListener("click", async () => {
     // Fallback: offline simulation in-browser if server not running
     console.warn("Backend unreachable, using client-side simulation:", err.message);
     const simulated = simulateLocally();
+    simulated.backend_unreachable = true;
     renderResult(simulated);
   } finally {
     spinnerWrap.classList.add("hidden");
@@ -162,7 +163,11 @@ function renderResult(data) {
   setTimeout(() => { confBarFill.style.width = `${pct}%`; }, 80);
 
   if (data.simulated) {
-    simulatedNote.textContent = "⚠️ Simulation mode — backend not connected. Results are illustrative only.";
+    if (data.backend_unreachable) {
+      simulatedNote.textContent = "⚠️ Backend unreachable. Using local browser simulation.";
+    } else {
+      simulatedNote.textContent = "⚠️ Simulation mode — trained models not found in backend. Using heuristic analysis.";
+    }
     simulatedNote.classList.remove("hidden");
   } else {
     simulatedNote.classList.add("hidden");

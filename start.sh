@@ -8,39 +8,51 @@ PROJECT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_DIR="$PROJECT_DIR/backend"
 FRONTEND_DIR="$PROJECT_DIR/frontend"
 FRONTEND_PORT=8080
-BACKEND_PORT=5000
+BACKEND_PORT=5001
 
 echo "🫁  LungAI — Starting up..."
 
 # 1. Start Flask backend
 cd "$BACKEND_DIR"
-if [ ! -d "venv" ]; then
-  echo "📦  Creating virtual environment..."
+
+# Check if venv is broken or missing
+if [ ! -d "venv" ] || [ ! -f "venv/bin/python3" ]; then
+  echo "📦  Recreating virtual environment..."
+  rm -rf venv
   python3 -m venv venv
   source venv/bin/activate
-  pip install flask flask-cors pillow numpy
+  echo "pip install -r requirements.txt"
+  pip install -r requirements.txt
 else
   source venv/bin/activate
 fi
 
 echo "🚀  Starting Flask backend on http://localhost:$BACKEND_PORT"
-python app.py &
+python3 app.py &
 BACKEND_PID=$!
 echo "    Backend PID: $BACKEND_PID"
 
 # Wait for Flask to be ready
-sleep 2
+sleep 3
 
 # 2. Serve frontend
 cd "$FRONTEND_DIR"
 echo "🌐  Serving frontend on http://localhost:$FRONTEND_PORT"
-python3 -m http.server $FRONTEND_PORT &
-FRONTEND_PID=$!
-echo "    Frontend PID: $FRONTEND_PID"
+# Use a simple check to see if port is in use
+if lsof -Pi :$FRONTEND_PORT -sTCP:LISTEN -t >/dev/null ; then
+    echo "⚠️  Port $FRONTEND_PORT is already in use. Skipping frontend server."
+    FRONTEND_PID=""
+else
+    python3 -m http.server $FRONTEND_PORT &
+    FRONTEND_PID=$!
+    echo "    Frontend PID: $FRONTEND_PID"
+fi
 
-# 3. Open in browser
-sleep 1
-open "http://localhost:$FRONTEND_PORT"
+# 3. Open in browser (if on Mac)
+if [[ "$OSTYPE" == "darwin"* ]]; then
+  sleep 1
+  open "http://localhost:$FRONTEND_PORT"
+fi
 
 echo ""
 echo "✅  LungAI is running!"

@@ -1,0 +1,25 @@
+# Python
+backend/venv/
+venv/
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Dataset folders (large)
+dataset/
+dataset_unzipped/
+The\ IQ-OTHNCCD\ lung\ cancer\ dataset/
+__MACOSX/
+
+# Dataset archives
+dataset.zip
+archive.zip
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+backend_server.log

@@ -14,9 +14,6 @@ CORS(app, resources={r"/*": {"origins": [
     "null",          # file:// origin
 ]}}, supports_credentials=False)
 
-# ---------------------------------------------------------------------------
-# Hardcoded performance metrics extracted from the four notebooks
-# ---------------------------------------------------------------------------
 MODEL_METRICS = {
     "VGG16": {
         "accuracy": 0.97,
@@ -86,9 +83,6 @@ MODEL_METRICS = {
 
 CLASSES = ["Benign", "Malignant", "Normal"]
 
-# ---------------------------------------------------------------------------
-# Model loading (real inference if model files exist; simulation otherwise)
-# ---------------------------------------------------------------------------
 MODELS_DIR = os.path.join(os.path.dirname(__file__), "models")
 
 vgg16_model = None
@@ -183,6 +177,19 @@ def preprocess_image(file_bytes, target_size=(224, 224)):
 # ---------------------------------------------------------------------------
 # Routes
 # ---------------------------------------------------------------------------
+@app.route("/", methods=["GET"])
+def index():
+    return jsonify({
+        "message": "Welcome to LungAI API",
+        "endpoints": {
+            "health": "/health",
+            "metrics": "/metrics",
+            "predict": "/predict (POST with 'image' file)"
+        },
+        "status": "online"
+    })
+
+
 @app.route("/health", methods=["GET"])
 def health():
     return jsonify({"status": "ok"})
@@ -241,4 +248,4 @@ def metrics():
 
 
 if __name__ == "__main__":
-    app.run(debug=True, port=5000)
+    app.run(debug=True, port=5001)
